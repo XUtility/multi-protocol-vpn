@@ -379,12 +379,30 @@ private fun ConnectionCard(
     // Happ layout: the orb floats directly on the background (no card box),
     // status word and clock under it, then the selected-config card — the
     // whole hero reads as one centred control, the way Happ's home does.
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    //
+    // 011 revision (R3): the Meridian used to be the LAST row of the column,
+    // so it added its full height below the config card. When the error card
+    // appeared at the top of the screen that pushed the arc below the fold —
+    // exactly when the user most wants to see the horizon. The arc is now
+    // pinned to the BOTTOM of the hero Box as an overlay inside a reserved
+    // band, so it is part of the hero's own bounds in every state (default,
+    // error card shown, compact) instead of trailing off-screen.
+    val showArc = C.aurora
+    val arcHeight = if (layout.compact) 74.dp else 92.dp
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = layout.cardPadding),
     ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                // Reserve just enough of the bottom band for the arc's node
+                // row so it never overlaps the config card; the arc itself is
+                // aligned to the hero's bottom edge, not stacked under it.
+                .padding(bottom = if (showArc) arcHeight - 26.dp else 0.dp),
+        ) {
         ConnectionRing(status = status, onToggle = onToggle)
         Spacer(Modifier.height(if (layout.compact) 12.dp else 16.dp))
         val (word, wordColor) = when (status) {
@@ -417,26 +435,43 @@ private fun ConnectionCard(
         SessionFactsRow(config = config, modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(if (layout.compact) 10.dp else 12.dp))
         LocationRow(config = config, onPick = onPickConfig, modifier = Modifier.fillMaxWidth())
-        // 011 — the Meridian: the card's lower region, spanning YOU to the
-        // exit node. The pulse's travel time IS the live rx rate (see
+        }
+        // 011 — the Meridian: the hero's lower band, spanning YOU to the exit
+        // node. The pulse's travel time IS the live rx rate (see
         // vpn.core.meridianPulseSeconds); disconnected = hairline only, and
-        // Classic never draws it at all. Placed under the rows so it can
-        // never collide with the ring above.
-        if (C.aurora) {
-            Spacer(Modifier.height(if (layout.compact) 2.dp else 6.dp))
+        // Classic never draws it at all. Pinned to the hero's bottom edge so
+        // it stays inside the card's visible bounds in every state.
+        if (showArc) {
             Meridian(
                 fromLabel = "YOU",
-                toLabel = config?.name?.uppercase() ?: "EXIT",
+                toLabel = meridianExitLabel(config?.name),
                 pulseSeconds = meridianPulseSeconds(
                     rxPerSec = AppState.trafficRate?.rxPerSec ?: 0L,
                     linkUp = status == VpnStatus.CONNECTED,
                 ),
                 modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(if (layout.compact) 84.dp else 112.dp),
+                    .height(arcHeight),
             )
         }
     }
+}
+
+/**
+ * R2 — the arc's exit label. The raw config name renders as ~40 characters of
+ * mono (`SWEDEN_IR_SE_X.X.X.X_SINGBOX_VIP_0_SWEDEN`) and runs off the right
+ * edge of the window. Turn it into a short human label: de-snake_cased, clipped
+ * to ~16 chars with an ellipsis. The Meridian composable already caps it at one
+ * line; this keeps the string itself legible.
+ */
+private fun meridianExitLabel(name: String?): String {
+    if (name.isNullOrBlank()) return "EXIT"
+    val human = name.replace('_', ' ').trim()
+    if (human.isEmpty()) return "EXIT"
+    val max = 16
+    val clipped = if (human.length <= max) human else human.take(max).trimEnd() + "…"
+    return clipped.uppercase()
 }
 
 /** Big power ring: idle hairline, breathing halo when secured, arc while busy. */
@@ -457,6 +492,16 @@ private fun ConnectionRing(status: VpnStatus, onToggle: () -> Unit) {
         animationSpec = infiniteRepeatable(tween(1400, easing = LinearEasing)),
         label = "sweep",
     )
+    // 011 R4 — the Aurora ring's conic band rotates slowly (the mock's
+    // `spin 22s linear infinite`). Frozen to a fixed offset under reduced /
+    // off motion so the frame stays lit but still.
+    val ringSpin by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(22_000, easing = LinearEasing)),
+        label = "ringSpin",
+    )
+    val spin = if (C.animationsEnabled && C.animationLevel == "full") ringSpin else 0f
 
     // The ring is the single biggest consumer of vertical space; on a phone-width
     // window a 186dp orb plus its card padding pushed everything else below the
@@ -465,6 +510,58 @@ private fun ConnectionRing(status: VpnStatus, onToggle: () -> Unit) {
     val knobSize = ringSize * 0.72f
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(ringSize)) {
         when {
+            // -- Aurora: conic teal->azure->violet band + soft outer bloom --
+            // (mock `.w1 .orb`: conic-gradient(from 200deg, teal, azure,
+            // violet, teal), a dark inner disc, and a wide low-alpha outer
+            // ping. Every glow is a stacked stroke — no blur on desktop.)
+            C.aurora && busy -> {
+                Canvas(Modifier.fillMaxSize().rotate(sweep)) {
+                    val r = size.minDimension / 2f
+                    val band = r * 0.16f
+                    drawArc(
+                        brush = Brush.sweepGradient(listOf(C.Accent3, C.Accent, C.Accent2, C.Accent3)),
+                        startAngle = -90f,
+                        sweepAngle = 110f,
+                        useCenter = false,
+                        topLeft = Offset(r - (r - band), r - (r - band)),
+                        size = androidx.compose.ui.geometry.Size((r - band) * 2f, (r - band) * 2f),
+                        style = Stroke(width = band, cap = StrokeCap.Round),
+                    )
+                }
+            }
+            C.aurora && connected -> {
+                Canvas(Modifier.fillMaxSize().rotate(spin)) {
+                    val r = size.minDimension / 2f
+                    val band = r * 0.15f
+                    val bandR = r - band / 2f - r * 0.02f
+                    // Soft outer bloom: two wider, very low-alpha strokes under
+                    // the band (the mock's ping ring, faked as stacked strokes).
+                    drawCircle(
+                        C.Accent3.copy(alpha = 0.10f), radius = bandR,
+                        style = Stroke(width = band * 2.6f),
+                    )
+                    drawCircle(
+                        C.Accent.copy(alpha = 0.16f), radius = bandR,
+                        style = Stroke(width = band * 1.7f),
+                    )
+                    // The conic band itself.
+                    drawCircle(
+                        brush = Brush.sweepGradient(
+                            listOf(C.Accent3, C.Accent, C.Accent2, C.Accent3),
+                        ),
+                        radius = bandR,
+                        style = Stroke(width = band, cap = StrokeCap.Butt),
+                    )
+                }
+            }
+            C.aurora -> {
+                // Aurora idle / disconnected / error: a cool hairline with a
+                // faint teal cast so the hero still reads as Meridian, not the
+                // old indigo circle.
+                Box(Modifier.fillMaxSize().border(1.dp, C.Accent3.copy(alpha = 0.35f), CircleShape))
+            }
+
+            // -- Classic: pixel-identical to the pre-011 ring --
             busy -> {
                 Box(Modifier.fillMaxSize().border(3.dp, C.Border, CircleShape))
                 Canvas(Modifier.fillMaxSize().rotate(sweep)) {
@@ -506,10 +603,14 @@ private fun ConnectionRing(status: VpnStatus, onToggle: () -> Unit) {
                 .size(knobSize)
                 .clip(CircleShape)
                 .background(
-                    if (connected || busy) {
-                        Brush.linearGradient(listOf(C.Accent, C.Accent2))
-                    } else {
-                        Brush.linearGradient(listOf(C.SurfaceHigh, C.Surface))
+                    when {
+                        // Aurora's knob is a dark disc so the conic band reads
+                        // as a ring around it (mock `.orb::before` radial
+                        // #0E1830→#070C1B); the power glyph goes teal.
+                        C.aurora && (connected || busy) ->
+                            Brush.radialGradient(listOf(C.SurfaceHigh, C.SurfaceLow))
+                        connected || busy -> Brush.linearGradient(listOf(C.Accent, C.Accent2))
+                        else -> Brush.linearGradient(listOf(C.SurfaceHigh, C.Surface))
                     },
                 )
                 .border(
@@ -522,7 +623,12 @@ private fun ConnectionRing(status: VpnStatus, onToggle: () -> Unit) {
             Icon(
                 if (status == VpnStatus.CONNECTING) Icons.Filled.Close else Icons.Filled.Power,
                 null,
-                tint = if (connected || busy) C.OnAccent else C.Accent,
+                tint = when {
+                    C.aurora && connected -> C.Accent3
+                    C.aurora && busy -> C.Accent
+                    connected || busy -> C.OnAccent
+                    else -> C.Accent
+                },
                 modifier = Modifier.size(42.dp),
             )
         }

@@ -39,6 +39,19 @@ object TrayIconManager {
     @Volatile
     private var quitApp: (() -> Unit)? = null
 
+    /** Last status reported, kept so a theme change can repaint the glyph +
+     *  tooltip immediately instead of waiting for the next status poll (R6). */
+    @Volatile
+    private var lastStatus: VpnStatus? = null
+
+    @Volatile
+    private var lastConfigName: String? = null
+
+    /** The tray image for the CURRENT palette: brand art, or the palette-tinted
+     *  fallback glyph when the packaged PNG is unavailable. */
+    private fun buildIcon(): Image =
+        loadBrandIcon() ?: renderIcon(vpn.theme.C.TrayGlyph.toArgb())
+
     /** Installs the tray icon. Safe to call twice; no-op when unsupported. */
     fun install(onShow: () -> Unit, onQuit: () -> Unit) {
         showWindow = onShow
@@ -79,7 +92,7 @@ object TrayIconManager {
 
             // 011: the fallback glyph plate comes from the active palette
             // (AWT needs the ARGB int, not a Compose Color).
-            val trayIcon = TrayIcon(loadBrandIcon() ?: renderIcon(vpn.theme.C.TrayGlyph.toArgb()), "MultiVPN", popup)
+            val trayIcon = TrayIcon(buildIcon(), "MultiVPN", popup)
             trayIcon.isImageAutoSize = true
             trayIcon.addMouseListener(object : MouseAdapter() {
                 override fun mouseClicked(e: MouseEvent) {
@@ -106,6 +119,8 @@ object TrayIconManager {
     /** Reflects the connection state in the icon colour + tooltip. */
     fun updateStatus(status: VpnStatus, configName: String?) {
         val trayIcon = icon ?: return
+        lastStatus = status
+        lastConfigName = configName
         // 011: the status tints now read from the active palette instead of
         // four loose hexes. (The artwork itself stays the Shield-M PNG; the
         // tint only labels the tooltip text below.)
@@ -123,6 +138,24 @@ object TrayIconManager {
                 // to turn the tray icon back into the old plain M.
                 trayIcon.setToolTip("MultiVPN — $label")
             }
+        }
+    }
+
+    /**
+     * R6 — repaint the tray for the CURRENT palette without waiting for the
+     * next status poll. Called from the Settings → Appearance theme chips the
+     * moment a look is saved: it re-derives the glyph from the active palette
+     * (the brand PNG is theme-neutral, but the fallback plate and the tooltip
+     * tint are not) and re-applies the last status. AWT mutation stays on the
+     * EDT.
+     */
+    fun refresh() {
+        val trayIcon = icon ?: return
+        val status = lastStatus
+        val configName = lastConfigName
+        SwingUtilities.invokeLater {
+            runCatching { trayIcon.image = buildIcon() }
+            if (status != null) updateStatus(status, configName)
         }
     }
 

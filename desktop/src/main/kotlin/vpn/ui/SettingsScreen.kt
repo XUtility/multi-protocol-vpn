@@ -170,10 +170,13 @@ fun SettingsScreen() {
                 SegmentedChip("Aurora", AppState.settings.themeId != "classic") {
                     AppState.settings = AppState.settings.copy(themeId = "aurora")
                     Storage.saveSettings(AppState.settings)
+                    // R6: repaint the tray glyph now, not on the next poll.
+                    TrayIconManager.refresh()
                 }
                 SegmentedChip("Classic", AppState.settings.themeId == "classic") {
                     AppState.settings = AppState.settings.copy(themeId = "classic")
                     Storage.saveSettings(AppState.settings)
+                    TrayIconManager.refresh()
                 }
             }
             Spacer(Modifier.height(8.dp))
