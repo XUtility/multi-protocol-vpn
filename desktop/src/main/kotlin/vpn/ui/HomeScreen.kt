@@ -74,7 +74,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -92,7 +91,9 @@ import vpn.core.VpnConfig
 import vpn.core.VpnModes
 import vpn.core.VpnService
 import vpn.core.VpnStatus
+import vpn.core.meridianPulseSeconds
 import vpn.theme.C
+import vpn.theme.Meridian
 import vpn.core.Preflight
 import vpn.core.ProxyPorts
 
@@ -156,7 +157,7 @@ fun HomeScreen() {
         // wasted half the window on duplicated information.
         Surface(
             color = Color.Transparent,
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(C.CornerHero),
             modifier = Modifier.fillMaxWidth(),
         ) {
             ConnectionCard(
@@ -416,6 +417,25 @@ private fun ConnectionCard(
         SessionFactsRow(config = config, modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(if (layout.compact) 10.dp else 12.dp))
         LocationRow(config = config, onPick = onPickConfig, modifier = Modifier.fillMaxWidth())
+        // 011 — the Meridian: the card's lower region, spanning YOU to the
+        // exit node. The pulse's travel time IS the live rx rate (see
+        // vpn.core.meridianPulseSeconds); disconnected = hairline only, and
+        // Classic never draws it at all. Placed under the rows so it can
+        // never collide with the ring above.
+        if (C.aurora) {
+            Spacer(Modifier.height(if (layout.compact) 2.dp else 6.dp))
+            Meridian(
+                fromLabel = "YOU",
+                toLabel = config?.name?.uppercase() ?: "EXIT",
+                pulseSeconds = meridianPulseSeconds(
+                    rxPerSec = AppState.trafficRate?.rxPerSec ?: 0L,
+                    linkUp = status == VpnStatus.CONNECTED,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(if (layout.compact) 84.dp else 112.dp),
+            )
+        }
     }
 }
 
@@ -522,7 +542,7 @@ private fun SessionTimer(startedAt: Long) {
     val total = ((now - startedAt) / 1000L).coerceAtLeast(0L)
     Text(
         "%02d:%02d:%02d".format(total / 3600, total / 60 % 60, total % 60),
-        fontFamily = FontFamily.Monospace,
+        fontFamily = C.FontMono,
         fontSize = 13.sp,
         fontWeight = FontWeight.SemiBold,
         color = C.TextPrimary,
@@ -928,7 +948,7 @@ private fun TrafficGraph(
                     Spacer(Modifier.weight(1f))
                     Box(Modifier.size(6.dp).clip(CircleShape).background(C.Accent).alpha((pulse * 0.8f).coerceIn(0f, 1f)))
                     Spacer(Modifier.width(5.dp))
-                    Text("1s", fontSize = 9.sp, color = C.TextSecondary, fontFamily = FontFamily.Monospace)
+                    Text("1s", fontSize = 9.sp, color = C.TextSecondary, fontFamily = C.FontMono)
                 }
                 Spacer(Modifier.height(5.dp))
                 Canvas(Modifier.fillMaxSize().weight(1f)) {
@@ -961,7 +981,7 @@ private fun TrafficGraph(
                     LegendDot(C.Success, if (perDirection) "Download" else "Traffic")
                     if (perDirection) LegendDot(C.Accent2, "Upload")
                     Spacer(Modifier.weight(1f))
-                    Text(TrafficStats.formatRate((all.maxOrNull() ?: 0f).toLong()), fontSize = 9.sp, color = C.TextSecondary, fontFamily = FontFamily.Monospace)
+                    Text(TrafficStats.formatRate((all.maxOrNull() ?: 0f).toLong()), fontSize = 9.sp, color = C.TextSecondary, fontFamily = C.FontMono)
                 }
             }
         }
@@ -1006,7 +1026,7 @@ private fun TrafficMetric(
             total,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace,
+            fontFamily = C.FontMono,
             color = C.TextPrimary,
             maxLines = 1,
         )
@@ -1015,7 +1035,7 @@ private fun TrafficMetric(
         Text(
             rate ?: " ",
             fontSize = 10.5.sp,
-            fontFamily = FontFamily.Monospace,
+            fontFamily = C.FontMono,
             color = tint,
             maxLines = 1,
         )
@@ -1115,7 +1135,7 @@ fun ServerLogDialog(onDismiss: () -> Unit) {
                     Text(
                         log,
                         color = C.AccentDim,
-                        fontFamily = FontFamily.Monospace,
+                        fontFamily = C.FontMono,
                         fontSize = 10.5.sp,
                         modifier = Modifier.padding(11.dp).height(320.dp).verticalScroll(scroll),
                     )

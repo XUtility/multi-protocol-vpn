@@ -87,12 +87,19 @@ fun Modifier.pressScale(interaction: MutableInteractionSource): Modifier {
 }
 
 /**
- * Carbon Pro backdrop (v3.9): graphite base gradient + a faint amber data
- * grid + two very subtle drifting glows + a slow horizontal scanline sweep.
- * Runs one infinite transition for all moving layers.
+ * Window backdrop dispatcher.
+ *
+ * Aurora theme → the drifting four-field light wash ([vpn.theme.AuroraBackdrop],
+ * plan 011). Classic → the Carbon Pro backdrop, untouched: graphite base
+ * gradient + a faint amber data grid + two very subtle drifting glows + a slow
+ * horizontal scanline sweep. Runs one infinite transition for all moving layers.
  */
 @Composable
 fun AuroraBackground(modifier: Modifier = Modifier) {
+    if (C.aurora) {
+        vpn.theme.AuroraBackdrop(modifier)
+        return
+    }
     if (!C.animationsEnabled) {
         val base = if (C.lightMode) C.BgBottom else C.BgMid
         Box(modifier.fillMaxSize().background(base)) {}
@@ -201,7 +208,7 @@ fun GlassCard(
         },
         tween(180),
     )
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(C.CornerCard)
     val border = if (accent) {
         BorderStroke(1.dp, Brush.linearGradient(listOf(C.Accent.copy(alpha = 0.72f), C.Accent2.copy(alpha = 0.56f))))
     } else {
@@ -287,7 +294,7 @@ fun ScreenHeader(title: String, subtitle: String, action: (@Composable () -> Uni
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column {
-            Text(title, fontSize = 21.sp, fontWeight = FontWeight.Bold, color = C.TextPrimary)
+            Text(title, fontSize = 21.sp, fontWeight = FontWeight.Bold, fontFamily = C.FontDisplay, color = C.TextPrimary)
             Text(subtitle, fontSize = 12.sp, color = C.TextSecondary)
         }
         action?.invoke()

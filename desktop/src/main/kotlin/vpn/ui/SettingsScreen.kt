@@ -46,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -157,6 +156,23 @@ fun SettingsScreen() {
                 Spacer(Modifier.width(6.dp))
                 SegmentedChip("Light", AppState.settings.theme == "light") {
                     AppState.settings = AppState.settings.copy(theme = "light")
+                    Storage.saveSettings(AppState.settings)
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            // 011 — visual identity chooser: Aurora Meridian (default) or the
+            // pre-011 Classic look, one click each way, persisted like every
+            // other setting and repainted immediately (the token layer is read
+            // live by every surface).
+            Text("Look", color = C.TextSecondary, fontSize = 11.sp)
+            Spacer(Modifier.height(5.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                SegmentedChip("Aurora", AppState.settings.themeId != "classic") {
+                    AppState.settings = AppState.settings.copy(themeId = "aurora")
+                    Storage.saveSettings(AppState.settings)
+                }
+                SegmentedChip("Classic", AppState.settings.themeId == "classic") {
+                    AppState.settings = AppState.settings.copy(themeId = "classic")
                     Storage.saveSettings(AppState.settings)
                 }
             }
@@ -721,7 +737,7 @@ private fun AppLogDialog(onDismiss: () -> Unit) {
                     Text(
                         text,
                         color = C.AccentDim,
-                        fontFamily = FontFamily.Monospace,
+                        fontFamily = C.FontMono,
                         fontSize = 10.5.sp,
                         modifier = Modifier.padding(11.dp).height(340.dp).verticalScroll(rememberScrollState()),
                     )

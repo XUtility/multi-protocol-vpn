@@ -1,5 +1,6 @@
 package vpn.ui
 
+import androidx.compose.ui.graphics.toArgb
 import vpn.core.AppLog
 import vpn.core.Proxy
 import vpn.core.VpnService
@@ -76,7 +77,9 @@ object TrayIconManager {
                 add(quitItem)
             }
 
-            val trayIcon = TrayIcon(loadBrandIcon() ?: renderIcon(0xFF22D3EE.toInt()), "MultiVPN", popup)
+            // 011: the fallback glyph plate comes from the active palette
+            // (AWT needs the ARGB int, not a Compose Color).
+            val trayIcon = TrayIcon(loadBrandIcon() ?: renderIcon(vpn.theme.C.TrayGlyph.toArgb()), "MultiVPN", popup)
             trayIcon.isImageAutoSize = true
             trayIcon.addMouseListener(object : MouseAdapter() {
                 override fun mouseClicked(e: MouseEvent) {
@@ -103,12 +106,15 @@ object TrayIconManager {
     /** Reflects the connection state in the icon colour + tooltip. */
     fun updateStatus(status: VpnStatus, configName: String?) {
         val trayIcon = icon ?: return
+        // 011: the status tints now read from the active palette instead of
+        // four loose hexes. (The artwork itself stays the Shield-M PNG; the
+        // tint only labels the tooltip text below.)
         val (_, label) = when (status) {
-            VpnStatus.CONNECTED -> 0xFF65F2B5.toInt() to "Connected${configName?.let { " — $it" } ?: ""}"
+            VpnStatus.CONNECTED -> vpn.theme.C.Success.toArgb() to "Connected${configName?.let { " — $it" } ?: ""}"
             VpnStatus.CONNECTING, VpnStatus.DISCONNECTING ->
-                0xFFFBBF24.toInt() to "Working…"
-            VpnStatus.ERROR -> 0xFFFFB4AB.toInt() to "Error — see app log"
-            VpnStatus.DISCONNECTED -> 0xFF00DBE9.toInt() to "Disconnected"
+                vpn.theme.C.Warning.toArgb() to "Working…"
+            VpnStatus.ERROR -> vpn.theme.C.Error.toArgb() to "Error — see app log"
+            VpnStatus.DISCONNECTED -> vpn.theme.C.Accent3.toArgb() to "Disconnected"
         }
         SwingUtilities.invokeLater {
             runCatching {
@@ -141,8 +147,9 @@ object TrayIconManager {
         val g: Graphics2D = img.createGraphics()
         g.color = Color(argb, true)
         g.fillRoundRect(0, 0, size, size, 6, 6)
-        // Dark "M" glyph colour as RGBA ints (the Color(Long, ...) overload does not exist).
-        g.color = Color(0x10, 0x11, 0x14)
+        // Dark "M" glyph ink from the active palette (AWT RGBA ints; the
+        // Color(Long, ...) overload does not exist).
+        g.color = java.awt.Color(vpn.theme.C.TrayGlyphInk.toArgb())
         g.font = g.font.deriveFont(java.awt.Font.BOLD, 11f)
         val fm = g.fontMetrics
         val x = ((size - fm.stringWidth("M")) / 2).toInt()

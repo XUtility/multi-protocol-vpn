@@ -222,6 +222,12 @@ data class AppSettings(
     var closeAction: String? = null,
     /** Visual theme: "carbon" (dark) or "light". */
     var theme: String = "carbon",
+    /**
+     * Visual identity (plan 011): "aurora" (Aurora Meridian, the default) or
+     * "classic" (the pre-011 look, kept reachable in Settings → Appearance).
+     * Unknown values fall back to the default on load (see Storage).
+     */
+    var themeId: String = "aurora",
     /** Whether decorative motion is enabled. */
     var animationsEnabled: Boolean = true,
     /** Animation intensity: "full", "reduced", or "off". */

@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -593,7 +592,7 @@ fun GrabAllDialog(server: ServerConfig, onDismiss: () -> Unit) {
                             Text(
                                 lines[i],
                                 color = C.AccentDim,
-                                fontFamily = FontFamily.Monospace,
+                                fontFamily = C.FontMono,
                                 fontSize = 10.5.sp,
                                 lineHeight = 14.sp,
                             )
@@ -681,7 +680,7 @@ fun SetupDialog(server: ServerConfig, protocol: String, onDismiss: () -> Unit) {
                             Text(
                                 line,
                                 color = C.AccentDim,
-                                fontFamily = FontFamily.Monospace,
+                                fontFamily = C.FontMono,
                                 fontSize = 10.5.sp,
                                 lineHeight = 14.sp,
                             )

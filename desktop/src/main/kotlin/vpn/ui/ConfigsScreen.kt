@@ -49,7 +49,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -537,7 +536,7 @@ private fun ShareConfigDialog(config: VpnConfig, onDismiss: () -> Unit) {
                         Text(
                             payload,
                             color = C.AccentDim,
-                            fontFamily = FontFamily.Monospace,
+                            fontFamily = C.FontMono,
                             fontSize = 10.5.sp,
                             modifier = Modifier
                                 .padding(11.dp)

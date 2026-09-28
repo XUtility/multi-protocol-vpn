@@ -287,6 +287,11 @@ object Storage {
             s.aether.scan = scan
             saveSettings(s)
         }
+        // 011: the visual identity id must be one of the shipped palettes —
+        // a garbage/unknown value falls back to the default, never a crash.
+        if (s.themeId !in vpn.theme.Palettes.ALL_IDS) {
+            s.themeId = vpn.theme.Palettes.DEFAULT_ID
+        }
         s
     } catch (e: Exception) {
         // P3-11 fix: a corrupt settings.json used to be reset to defaults

@@ -44,7 +44,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +55,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -134,9 +134,6 @@ fun main() {
             LocalWindowExceptionHandlerFactory provides loggingExceptionHandlerFactory,
         ) {
         val windowState = rememberWindowState(width = 1100.dp, height = 760.dp)
-        val themeLight by remember {
-            derivedStateOf { AppState.settings.theme == "light" }
-        }
         val quit: () -> Unit = {
             // Closing the window must fully quit the app: kill the proxy
             // cores and clear the system proxy so nothing is left running
@@ -205,13 +202,10 @@ fun main() {
             // that an undecorated+resizable window keeps (measured: 7px at the
             // top, client origin sits at window+7). Its default is a LIGHT
             // system colour, which is the white hairline visible above the
-            // title bar. Paint it the same graphite as the title bar so the seam
-            // disappears whether DWM composites it or PrintWindow captures it.
-            val windowBg = if (themeLight) {
-                java.awt.Color(0xF7, 0xF8, 0xFC)
-            } else {
-                java.awt.Color(0x0B, 0x10, 0x20)
-            }
+            // title bar. Paint it the same ground as the active palette so the
+            // seam disappears whether DWM composites it or PrintWindow captures
+            // it. (011: was a hardcoded navy/frost pair that ignored the theme.)
+            val windowBg = java.awt.Color(C.BgTop.toArgb())
             window.background = windowBg
             runCatching { window.contentPane.background = windowBg }
             // undecorated=true also strips WS_THICKFRAME, i.e. the OS resize
@@ -271,17 +265,23 @@ fun main() {
                 light = AppState.settings.theme == "light",
                 animations = AppState.settings.animationsEnabled,
                 level = AppState.settings.animationLevel,
+                theme = AppState.settings.themeId,
             ) {
-                Column(Modifier.fillMaxSize()) {
-                    AppTitleBar(
-                        state = windowState,
-                        title = "MultiVPN — Multi-Protocol Client",
-                        // The in-app X must behave exactly like the OS one.
-                        // Before 3.6.16 it called quit() directly, so the
-                        // titlebar button ignored the tray preference entirely.
-                        onClose = requestClose,
-                    )
-                    App()
+                // 011: the backdrop is painted BEHIND EVERYTHING, including the
+                // custom title bar area, so the window reads as one surface.
+                Box(Modifier.fillMaxSize()) {
+                    AuroraBackground(Modifier.fillMaxSize())
+                    Column(Modifier.fillMaxSize()) {
+                        AppTitleBar(
+                            state = windowState,
+                            title = "MultiVPN — Multi-Protocol Client",
+                            // The in-app X must behave exactly like the OS one.
+                            // Before 3.6.16 it called quit() directly, so the
+                            // titlebar button ignored the tray preference entirely.
+                            onClose = requestClose,
+                        )
+                        App()
+                    }
                 }
                 if (askOnClose) {
                     vpn.ui.CloseChoiceDialog(
@@ -367,7 +367,8 @@ fun App() {
         ProvideLayout(widthDp) {
             val layout = LocalLayout.current
             Box(Modifier.fillMaxSize()) {
-                AuroraBackground(Modifier.fillMaxSize())
+                // (011) The backdrop moved up to the window root so it runs
+                // behind the title bar too — see the MultiVpnTheme content.
 
                 val screens: @Composable () -> Unit = {
                     AnimatedContent(

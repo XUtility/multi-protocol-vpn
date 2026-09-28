@@ -118,7 +118,7 @@ fun WindowScope.AppTitleBar(
                     description = "Close",
                     onClick = onClose,
                     hoverColor = C.Error,
-                    hoverIconColor = Color.White,
+                    hoverIconColor = C.OnAccent,
                 )
             }
         }
