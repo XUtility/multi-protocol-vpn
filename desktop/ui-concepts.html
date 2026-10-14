@@ -1,0 +1,1454 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MultiVPN - UI directions</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page-bg: #090d10;
+      --page-panel: #11171b;
+      --page-line: #273138;
+      --page-text: #edf2f2;
+      --page-muted: #9caab0;
+      --shadow: 0 34px 90px rgba(0, 0, 0, .46);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--page-bg); }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+        var(--page-bg);
+      background-size: 48px 48px;
+      color: var(--page-text);
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible {
+      outline: 3px solid #f2c94c;
+      outline-offset: 3px;
+    }
+
+    .board-head {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 58px 0 34px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 410px);
+      gap: 48px;
+      align-items: end;
+      border-bottom: 1px solid var(--page-line);
+    }
+
+    .board-kicker {
+      margin: 0 0 12px;
+      color: #f2c94c;
+      font: 700 12px/1.2 "Cascadia Mono", monospace;
+      letter-spacing: .08em;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font: 800 clamp(36px, 6vw, 72px)/.95 "Bahnschrift", "Arial Narrow", sans-serif;
+      letter-spacing: -.035em;
+    }
+
+    .board-head p {
+      margin: 0;
+      color: var(--page-muted);
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    main {
+      width: min(1320px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 34px 0 96px;
+    }
+
+    .concept {
+      margin: 0 0 72px;
+      padding: 24px;
+      background: rgba(17, 23, 27, .82);
+      border: 1px solid var(--page-line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .concept-copy {
+      display: grid;
+      grid-template-columns: 80px minmax(0, 1fr) minmax(250px, 370px);
+      gap: 24px;
+      align-items: start;
+      margin: 2px 0 24px;
+    }
+
+    .concept-index {
+      color: #6f7d84;
+      font: 700 12px/1 "Cascadia Mono", monospace;
+    }
+
+    .concept h2 {
+      margin: 0 0 8px;
+      font: 700 24px/1.1 "Bahnschrift", "Arial Narrow", sans-serif;
+      letter-spacing: -.01em;
+    }
+
+    .concept-copy p {
+      margin: 0;
+      max-width: 700px;
+      color: var(--page-muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .token-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .token {
+      height: 42px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 8px;
+      display: grid;
+      place-items: end center;
+      padding: 5px 4px;
+      color: rgba(255,255,255,.78);
+      font: 700 8px/1 "Cascadia Mono", monospace;
+      text-shadow: 0 1px 1px rgba(0,0,0,.35);
+    }
+
+    .screen {
+      position: relative;
+      width: 100%;
+      height: 703px;
+      overflow: hidden;
+      background: #050708;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 12px;
+    }
+
+    .app {
+      width: 1280px;
+      height: 760px;
+      overflow: hidden;
+      transform-origin: top left;
+      transform: scale(var(--screen-scale, .86));
+      box-shadow: 0 28px 90px rgba(0,0,0,.7);
+    }
+
+    .winbar {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 14px;
+      user-select: none;
+    }
+
+    .winbar .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font: 700 13px/1 "Bahnschrift", sans-serif;
+    }
+
+    .winbar .brand img {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .winbar .path {
+      flex: 1;
+      text-align: center;
+      font: 600 10px/1 "Cascadia Mono", monospace;
+    }
+
+    .win-actions { display: flex; gap: 8px; }
+    .win-actions span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.18);
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      display: block;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-icon {
+      width: 38px;
+      height: 38px;
+      border: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: transparent;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 0 4px rgba(200,242,106,.16);
+      flex: none;
+    }
+
+    /* 01 - Signal Console */
+    .app-signal {
+      background: #0b0f12;
+      color: #e9eeeb;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    .app-signal .winbar {
+      color: #8f9ba0;
+      background: #0d1114;
+      border-bottom: 1px solid #242c31;
+    }
+
+    .signal-shell {
+      height: calc(100% - 42px);
+      display: grid;
+      grid-template-columns: 72px 1fr;
+    }
+
+    .signal-rail {
+      background: #10161a;
+      border-right: 1px solid #2b3439;
+      padding: 18px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .signal-rail .nav-icon { color: #758187; }
+    .signal-rail .nav-icon.active {
+      color: #111610;
+      background: #c8f26a;
+    }
+
+    .signal-rail .spacer { flex: 1; }
+    .signal-main { min-width: 0; padding: 22px 26px 24px; }
+
+    .signal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .signal-title h3 {
+      margin: 0;
+      font: 700 26px/1 "Bahnschrift", sans-serif;
+      letter-spacing: -.015em;
+    }
+
+    .signal-title p {
+      margin: 6px 0 0;
+      color: #7f8b90;
+      font: 500 11px/1 "Cascadia Mono", monospace;
+    }
+
+    .signal-actions { display: flex; align-items: center; gap: 10px; }
+
+    .square-button, .signal-button {
+      min-height: 40px;
+      border-radius: 7px;
+      border: 1px solid #344047;
+      background: #141b1f;
+      color: #c8d0d2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 13px;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .signal-button.primary {
+      border-color: #ff6b35;
+      background: #ff6b35;
+      color: #1a0d08;
+      padding: 0 18px;
+    }
+
+    .signal-grid {
+      height: calc(100% - 72px);
+      display: grid;
+      grid-template-columns: 280px 1fr 348px;
+      gap: 14px;
+    }
+
+    .signal-panel {
+      background: #11171b;
+      border: 1px solid #2d373c;
+      border-radius: 10px;
+      min-width: 0;
+    }
+
+    .server-browser { padding: 14px; }
+    .panel-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #93a0a5;
+      font: 700 10px/1 "Cascadia Mono", monospace;
+      letter-spacing: .06em;
+      margin-bottom: 12px;
+    }
+
+    .search {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      margin-bottom: 12px;
+      color: #68757b;
+      background: #0c1114;
+      border: 1px solid #283238;
+      border-radius: 7px;
+      font-size: 11px;
+    }
+
+    .server-item {
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: 32px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 9px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+    }
+
+    .server-item.active {
+      background: #1b2226;
+      border-color: #4a565b;
+    }
+
+    .server-badge {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #202a2f;
+      color: #f5b82e;
+      font: 800 10px/1 "Cascadia Mono", monospace;
+    }
+
+    .server-item strong {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .server-item small {
+      display: block;
+      color: #748187;
+      font: 500 9px/1 "Cascadia Mono", monospace;
+    }
+
+    .server-latency {
+      color: #c8f26a;
+      font: 700 10px/1 "Cascadia Mono", monospace;
+    }
+
+    .connection-console {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      padding: 18px;
+      background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+        #10161a;
+      background-size: 28px 28px;
+    }
+
+    .connection-center {
+      display: grid;
+      place-items: center;
+      align-content: center;
+      text-align: center;
+    }
+
+    .route-kicker {
+      color: #879398;
+      font: 700 10px/1 "Cascadia Mono", monospace;
+      letter-spacing: .08em;
+      margin-bottom: 18px;
+    }
+
+    .dial {
+      width: 236px;
+      height: 236px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: conic-gradient(from 210deg, #c8f26a 0 71%, #273137 71% 100%);
+      box-shadow: 0 0 0 1px #3d494e, 0 0 44px rgba(200,242,106,.08);
+    }
+
+    .dial::before {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border-radius: 50%;
+      background: #0d1316;
+      border: 1px solid #334047;
+    }
+
+    .dial::after {
+      content: "";
+      width: 180px;
+      height: 180px;
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed #2d383e;
+    }
+
+    .dial-content {
+      z-index: 2;
+      width: 150px;
+      height: 150px;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      border-radius: 50%;
+      background: #141b1f;
+      border: 1px solid #3b484e;
+    }
+
+    .dial-content .power {
+      width: 24px;
+      height: 24px;
+      color: #c8f26a;
+      margin-bottom: 9px;
+    }
+
+    .dial-content strong {
+      color: #c8f26a;
+      font: 800 17px/1 "Bahnschrift", sans-serif;
+      letter-spacing: .02em;
+    }
+
+    .dial-content span {
+      margin-top: 6px;
+      color: #7f8c91;
+      font: 600 10px/1 "Cascadia Mono", monospace;
+    }
+
+    .route-facts {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .fact {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 30px;
+      padding: 0 10px;
+      color: #b7c0c3;
+      background: #151c20;
+      border: 1px solid #303a40;
+      border-radius: 7px;
+      font: 600 10px/1 "Cascadia Mono", monospace;
+    }
+
+    .fact b { color: #edf2f2; }
+
+    .console-footer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #2d373c;
+    }
+
+    .console-footer p { margin: 0; color: #7f8c91; font-size: 11px; }
+    .console-footer strong { color: #edf2f2; }
+
+    .telemetry {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
+      padding: 15px;
+    }
+
+    .telemetry-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .metric {
+      padding: 11px;
+      background: #0d1316;
+      border: 1px solid #2c363b;
+      border-radius: 8px;
+    }
+
+    .metric span {
+      display: block;
+      margin-bottom: 7px;
+      color: #77848a;
+      font: 700 9px/1 "Cascadia Mono", monospace;
+    }
+
+    .metric strong { font: 700 18px/1 "Bahnschrift", sans-serif; }
+    .metric small { color: #77848a; font-size: 9px; }
+
+    .wave {
+      min-height: 104px;
+      padding: 11px;
+      background: #0c1114;
+      border: 1px solid #2d373c;
+      border-radius: 8px;
+    }
+
+    .wave svg { width: 100%; height: 74px; display: block; }
+    .wave .grid { stroke: #263137; stroke-width: 1; }
+    .wave .down { stroke: #c8f26a; }
+    .wave .up { stroke: #ff6b35; }
+
+    .event-list { display: grid; align-content: start; gap: 8px; }
+
+    .event {
+      display: grid;
+      grid-template-columns: 54px 1fr auto;
+      gap: 9px;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #242d32;
+      color: #a5b0b4;
+      font-size: 10.5px;
+    }
+
+    .event time, .event em {
+      color: #6f7b80;
+      font: 600 9px/1 "Cascadia Mono", monospace;
+      font-style: normal;
+    }
+
+    .event b { color: #dbe2e3; font-weight: 600; }
+
+    /* 02 - Daylight Control */
+    .app-daylight {
+      color: #172220;
+      background: #f3f6f4;
+      font-family: "Aptos", "Segoe UI", sans-serif;
+    }
+
+    .app-daylight .winbar {
+      background: #e9eeeb;
+      border-bottom: 1px solid #c7d0cc;
+      color: #45534f;
+    }
+
+    .daylight-shell {
+      height: calc(100% - 42px);
+      display: grid;
+      grid-template-columns: 212px 1fr;
+    }
+
+    .daylight-side {
+      padding: 24px 18px;
+      background: #e8eeeb;
+      border-right: 1px solid #c7d0cc;
+    }
+
+    .daylight-side .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px 23px;
+      border-bottom: 1px solid #c8d1cd;
+      font: 800 16px/1 "Aptos Display", "Segoe UI", sans-serif;
+    }
+
+    .daylight-side .nav-brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+    }
+
+    .daylight-nav { display: grid; gap: 5px; margin-top: 20px; }
+    .daylight-nav button {
+      width: 100%;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 11px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: #53615d;
+      background: transparent;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .daylight-nav button.active {
+      color: #172220;
+      background: #ffffff;
+      border-color: #cbd4d0;
+      box-shadow: 0 4px 12px rgba(39, 63, 56, .06);
+    }
+
+    .daylight-side .side-note {
+      margin-top: 28px;
+      padding: 13px;
+      border-left: 3px solid #2155cd;
+      color: #5d6a67;
+      background: rgba(255,255,255,.46);
+      font-size: 10.5px;
+      line-height: 1.55;
+    }
+
+    .daylight-main { padding: 28px 30px; min-width: 0; }
+
+    .daylight-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    .daylight-head h3 {
+      margin: 0;
+      font: 800 31px/1.08 "Aptos Display", "Segoe UI", sans-serif;
+      letter-spacing: -.035em;
+    }
+
+    .daylight-head p { margin: 8px 0 0; color: #67736f; font-size: 12px; }
+
+    .profile {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #172220;
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .health-band {
+      min-height: 74px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      color: #effbf6;
+      background: #0a7d64;
+      border-radius: 10px;
+    }
+
+    .health-symbol {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(255,255,255,.14);
+    }
+
+    .health-band strong { display: block; font-size: 14px; margin-bottom: 5px; }
+    .health-band span { color: rgba(255,255,255,.74); font-size: 11px; }
+
+    .health-time {
+      text-align: right;
+      font: 700 18px/1 "Cambria", Georgia, serif;
+    }
+
+    .health-time small {
+      display: block;
+      margin-top: 5px;
+      color: rgba(255,255,255,.68);
+      font: 600 9px/1 "Aptos", sans-serif;
+      letter-spacing: .08em;
+    }
+
+    .daylight-grid {
+      height: calc(100% - 190px);
+      display: grid;
+      grid-template-columns: 1fr 354px;
+      gap: 18px;
+    }
+
+    .light-card {
+      background: #ffffff;
+      border: 1px solid #ccd5d1;
+      border-radius: 11px;
+      box-shadow: 0 9px 22px rgba(42, 58, 53, .05);
+    }
+
+    .servers-table { overflow: hidden; }
+
+    .table-head {
+      min-height: 48px;
+      display: grid;
+      grid-template-columns: 1fr 112px 88px;
+      align-items: center;
+      gap: 15px;
+      padding: 0 18px;
+      color: #6d7a76;
+      background: #f8faf9;
+      border-bottom: 1px solid #d8dfdc;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .table-row {
+      min-height: 63px;
+      display: grid;
+      grid-template-columns: 1fr 112px 88px;
+      align-items: center;
+      gap: 15px;
+      padding: 0 18px;
+      border-bottom: 1px solid #e1e7e4;
+    }
+
+    .table-row.active {
+      background: #eef4ff;
+      box-shadow: inset 4px 0 0 #2155cd;
+    }
+
+    .server-name { display: flex; align-items: center; gap: 12px; }
+    .server-marker {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      color: #2155cd;
+      background: #e8efff;
+      font: 800 10px/1 "Aptos", sans-serif;
+    }
+
+    .server-name strong { display: block; font-size: 12.5px; margin-bottom: 4px; }
+    .server-name small { color: #75817e; font-size: 10px; }
+
+    .protocol {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #4c5a56;
+      font-size: 11px;
+    }
+
+    .protocol::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: #2155cd;
+    }
+
+    .table-latency { color: #0a7d64; font: 800 12px/1 "Aptos", sans-serif; }
+    .control-panel { padding: 18px; }
+
+    .section-rule {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      color: #66736f;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .protocol-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .protocol-selector button {
+      min-height: 34px;
+      padding: 0 7px;
+      border: 1px solid #cbd4d0;
+      border-radius: 6px;
+      background: #f8faf9;
+      color: #60706b;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .protocol-selector button.active {
+      border-color: #2155cd;
+      color: #ffffff;
+      background: #2155cd;
+    }
+
+    .info-line {
+      min-height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid #e0e6e3;
+      font-size: 11px;
+    }
+
+    .info-line span { color: #71807b; }
+    .info-line strong { font-weight: 700; text-align: right; }
+
+    .daylight-action {
+      width: 100%;
+      min-height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-top: 18px;
+      border: 0;
+      border-radius: 7px;
+      color: #ffffff;
+      background: #172220;
+      font-weight: 750;
+    }
+
+    .daylight-subtle {
+      margin-top: 10px;
+      color: #71807b;
+      font-size: 10px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    /* 03 - Route Atlas */
+    .app-route {
+      color: #f2f0e8;
+      background: #131a20;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    .app-route .winbar {
+      color: #aeb7ba;
+      background: #10161b;
+      border-bottom: 1px solid #313a3f;
+    }
+
+    .route-shell {
+      height: calc(100% - 42px);
+      display: grid;
+      grid-template-columns: 242px 1fr;
+    }
+
+    .route-side {
+      padding: 22px 18px;
+      background: #171f25;
+      border-right: 1px solid #343e43;
+    }
+
+    .route-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding-bottom: 21px;
+      border-bottom: 1px solid #343e43;
+      font: 800 16px/1 "Trebuchet MS", sans-serif;
+    }
+
+    .route-brand img { width: 34px; height: 34px; border-radius: 9px; }
+
+    .route-side h4 {
+      margin: 24px 0 10px;
+      color: #9ca7aa;
+      font: 700 10px/1 "Cascadia Mono", monospace;
+      letter-spacing: .07em;
+    }
+
+    .ticket {
+      min-height: 64px;
+      display: grid;
+      grid-template-columns: 9px 1fr;
+      gap: 11px;
+      align-items: center;
+      padding: 10px;
+      margin-bottom: 7px;
+      border: 1px solid transparent;
+      border-radius: 9px;
+      background: #131a20;
+    }
+
+    .ticket.active {
+      background: #222d33;
+      border-color: #556369;
+    }
+
+    .ticket-line {
+      width: 5px;
+      height: 38px;
+      border-radius: 5px;
+      background: #f4d35e;
+    }
+
+    .ticket.active .ticket-line { background: #ff725e; }
+    .ticket strong { display: block; font-size: 12px; margin-bottom: 5px; }
+    .ticket small { color: #89969a; font-size: 9.5px; }
+
+    .route-main { min-width: 0; padding: 22px 26px; }
+
+    .route-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .route-head h3 {
+      margin: 0;
+      font: 800 27px/1 "Trebuchet MS", sans-serif;
+      letter-spacing: -.02em;
+    }
+
+    .route-head p { margin: 7px 0 0; color: #89969a; font-size: 11px; }
+
+    .route-button {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 17px;
+      border: 1px solid #ff725e;
+      border-radius: 8px;
+      color: #1a0e0b;
+      background: #ff725e;
+      font-weight: 800;
+    }
+
+    .map-card {
+      height: 356px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #3a454b;
+      border-radius: 13px;
+      background:
+        radial-gradient(circle at 12% 24%, rgba(244,211,94,.08), transparent 24%),
+        linear-gradient(#182127 1px, transparent 1px),
+        linear-gradient(90deg, #182127 1px, transparent 1px),
+        #10171c;
+      background-size: auto, 34px 34px, 34px 34px, auto;
+    }
+
+    .map-title {
+      position: absolute;
+      top: 18px;
+      left: 20px;
+      z-index: 3;
+    }
+
+    .map-title strong { display: block; font-size: 14px; }
+    .map-title span { color: #96a2a6; font-size: 10px; }
+
+    .route-path {
+      position: absolute;
+      left: 82px;
+      right: 84px;
+      top: 180px;
+      height: 92px;
+    }
+
+    .route-path svg { width: 100%; height: 100%; overflow: visible; }
+    .route-path .base { fill: none; stroke: #455158; stroke-width: 8; stroke-linecap: round; }
+    .route-path .live { fill: none; stroke: #ff725e; stroke-width: 5; stroke-linecap: round; }
+    .route-path .next { fill: none; stroke: #f4d35e; stroke-width: 4; stroke-dasharray: 9 10; stroke-linecap: round; }
+
+    .node {
+      position: absolute;
+      z-index: 4;
+      width: 118px;
+      text-align: center;
+      transform: translateX(-50%);
+    }
+
+    .node .pin {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 9px;
+      border: 6px solid #10171c;
+      border-radius: 50%;
+      background: #7ddfc2;
+      color: #112016;
+      box-shadow: 0 0 0 2px #7ddfc2;
+    }
+
+    .node.secondary .pin { background: #ff725e; color: #2a100b; box-shadow: 0 0 0 2px #ff725e; }
+    .node.tertiary .pin { background: #f4d35e; color: #2a2105; box-shadow: 0 0 0 2px #f4d35e; }
+    .node strong { display: block; font-size: 11px; }
+    .node small { color: #929da1; font-size: 9px; }
+
+    .node.one { left: 11%; top: 178px; }
+    .node.two { left: 51%; top: 178px; }
+    .node.three { left: 89%; top: 178px; }
+
+    .route-caption {
+      position: absolute;
+      left: 20px;
+      bottom: 17px;
+      display: flex;
+      gap: 18px;
+      color: #9ca8ab;
+      font-size: 10px;
+    }
+
+    .route-caption span { display: inline-flex; align-items: center; gap: 7px; }
+    .route-caption i { width: 16px; height: 4px; border-radius: 4px; display: block; }
+
+    .route-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .route-stat {
+      min-height: 112px;
+      padding: 14px;
+      border: 1px solid #3a454b;
+      border-radius: 10px;
+      background: #171f25;
+    }
+
+    .route-stat span {
+      display: block;
+      color: #8d999d;
+      font: 700 9px/1 "Cascadia Mono", monospace;
+      margin-bottom: 12px;
+    }
+
+    .route-stat strong {
+      display: block;
+      font: 800 24px/1 "Trebuchet MS", sans-serif;
+      letter-spacing: -.03em;
+    }
+
+    .route-stat small { display: block; margin-top: 8px; color: #8d999d; font-size: 10px; }
+    .route-stat.accent strong { color: #ff725e; }
+    .route-stat.yellow strong { color: #f4d35e; }
+    .route-stat.green strong { color: #7ddfc2; }
+
+    @media (max-width: 900px) {
+      .board-head, .concept-copy { grid-template-columns: 1fr; }
+      .concept-index { display: none; }
+      .token-row { max-width: 500px; }
+      .concept { padding: 15px; }
+    }
+
+    @media (max-width: 560px) {
+      .board-head, main { width: min(100% - 24px, 1320px); }
+      .board-head { padding-top: 34px; }
+      .concept { border-radius: 12px; }
+      .token { height: 36px; font-size: 7px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="board-head">
+    <div>
+      <p class="board-kicker">MULTIVPN / WINDOWS / VISUAL DIRECTIONS</p>
+      <h1>Three ways to make trust visible.</h1>
+    </div>
+    <p>Each direction keeps the same product job: pick a route, connect quickly, verify the tunnel, and understand what changed. The difference is how much operational detail is exposed and where the eye goes first.</p>
+  </header>
+
+  <main>
+    <section class="concept">
+      <div class="concept-copy">
+        <span class="concept-index">01</span>
+        <div>
+          <h2>Signal Console</h2>
+          <p>A compact operations surface for people who keep several routes and want state, traffic, and events visible at once. The connection is shown as a physical control, not a marketing centerpiece.</p>
+        </div>
+        <div class="token-row">
+          <span class="token" style="background:#0b0f12">INK</span>
+          <span class="token" style="background:#11171b">PANEL</span>
+          <span class="token" style="background:#c8f26a;color:#111610">LIVE</span>
+          <span class="token" style="background:#ff6b35;color:#1a0d08">ACTION</span>
+          <span class="token" style="background:#edf2f2;color:#172022">TEXT</span>
+        </div>
+      </div>
+
+      <div class="screen">
+        <div class="app app-signal">
+          <div class="winbar">
+            <div class="brand"><img src="icon/icon-2-shield-m-256.png" alt="">MultiVPN</div>
+            <div class="path">signal-console / route-04</div>
+            <div class="win-actions"><span></span><span></span><span></span></div>
+          </div>
+          <div class="signal-shell">
+            <aside class="signal-rail">
+              <button class="nav-icon active" aria-label="Home">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg>
+              </button>
+              <button class="nav-icon" aria-label="Configurations">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+              </button>
+              <button class="nav-icon" aria-label="Servers">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="5" rx="1"/><rect x="4" y="14" width="16" height="5" rx="1"/><path d="M8 7.5h.01M8 16.5h.01"/></svg>
+              </button>
+              <button class="nav-icon" aria-label="Traffic rules">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M4 7h8l3-3 5 5-5 5-3-3H4z"/><path d="M4 17h10"/></svg>
+              </button>
+              <span class="spacer"></span>
+              <button class="nav-icon" aria-label="Settings">
+                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1z"/></svg>
+              </button>
+            </aside>
+
+            <section class="signal-main">
+              <div class="signal-head">
+                <div class="signal-title">
+                  <h3>Route control</h3>
+                  <p>TUNABLE OPERATIONS VIEW / 1 CONNECTED TUNNEL</p>
+                </div>
+                <div class="signal-actions">
+                  <button class="square-button">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg>
+                    Add route
+                  </button>
+                  <button class="signal-button primary">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>
+                    Disconnect
+                  </button>
+                </div>
+              </div>
+
+              <div class="signal-grid">
+                <section class="signal-panel server-browser">
+                  <div class="panel-label"><span>ROUTES</span><span>4</span></div>
+                  <div class="search">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg>
+                    Search routes
+                  </div>
+                  <div class="server-item active">
+                    <span class="server-badge">DE</span>
+                    <div><strong>Frankfurt 04</strong><small>Hysteria2 / UDP 443</small></div>
+                    <span class="server-latency">418 ms</span>
+                  </div>
+                  <div class="server-item">
+                    <span class="server-badge">NL</span>
+                    <div><strong>Amsterdam 02</strong><small>VLESS Reality</small></div>
+                    <span class="server-latency">521 ms</span>
+                  </div>
+                  <div class="server-item">
+                    <span class="server-badge">TR</span>
+                    <div><strong>Istanbul 01</strong><small>AmneziaWG 3.1</small></div>
+                    <span class="server-latency">380 ms</span>
+                  </div>
+                  <div class="server-item">
+                    <span class="server-badge">FI</span>
+                    <div><strong>Helsinki 03</strong><small>OpenVPN / TCP</small></div>
+                    <span class="server-latency">742 ms</span>
+                  </div>
+                </section>
+
+                <section class="signal-panel connection-console">
+                  <div class="connection-center">
+                    <div class="route-kicker">ROUTE 04 / FRANKFURT</div>
+                    <div class="dial">
+                      <div class="dial-content">
+                        <svg class="icon power" viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>
+                        <strong>SECURED</strong>
+                        <span>00:12:47</span>
+                      </div>
+                    </div>
+                    <div class="route-facts">
+                      <span class="fact"><span class="status-dot" style="color:#c8f26a"></span><b>204</b> verified</span>
+                      <span class="fact">TUN <b>active</b></span>
+                      <span class="fact">DNS <b>pinned</b></span>
+                    </div>
+                  </div>
+                  <div class="console-footer">
+                    <p><strong>Disconnect</strong> tears down the tunnel and restores the previous system route.</p>
+                    <button class="square-button">Details</button>
+                  </div>
+                </section>
+                <aside class="signal-panel telemetry">
+                  <div class="panel-label"><span>LIVE TELEMETRY</span><span style="color:#c8f26a">HEALTHY</span></div>
+                  <div class="telemetry-summary">
+                    <div class="metric"><span>DOWNLOAD</span><strong>28.4</strong> <small>Mbps</small></div>
+                    <div class="metric"><span>UPLOAD</span><strong>7.8</strong> <small>Mbps</small></div>
+                  </div>
+                  <div class="wave">
+                    <svg viewBox="0 0 320 80" preserveAspectRatio="none" aria-label="Traffic graph">
+                      <path class="grid" d="M0 20h320M0 40h320M0 60h320"/>
+                      <polyline class="down" fill="none" stroke-width="2" points="0,53 18,49 36,55 54,42 72,46 90,35 108,38 126,29 144,34 162,22 180,27 198,18 216,25 234,20 252,28 270,16 288,21 306,12 320,17"/>
+                      <polyline class="up" fill="none" stroke-width="2" points="0,65 18,62 36,64 54,60 72,61 90,57 108,59 126,54 144,57 162,52 180,55 198,50 216,54 234,49 252,52 270,47 288,50 306,45 320,48"/>
+                    </svg>
+                  </div>
+                  <div class="event-list">
+                    <div class="event"><time>12:48:04</time><span><b>Handshake refreshed</b></span><em>19 ms</em></div>
+                    <div class="event"><time>12:47:31</time><span>Traffic endpoint verified</span><em>204</em></div>
+                    <div class="event"><time>12:46:19</time><span>DNS pin applied</span><em>OK</em></div>
+                    <div class="event"><time>12:45:22</time><span>Route selected</span><em>DE-04</em></div>
+                  </div>
+                </aside>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="concept">
+      <div class="concept-copy">
+        <span class="concept-index">02</span>
+        <div>
+          <h2>Daylight Control</h2>
+          <p>A lighter, less technical direction that prioritizes readability and quick confidence. Server selection behaves like a clear table, while the connection state occupies a full-width health band.</p>
+        </div>
+        <div class="token-row">
+          <span class="token" style="background:#f3f6f4;color:#24312e">CANVAS</span>
+          <span class="token" style="background:#172220">INK</span>
+          <span class="token" style="background:#0a7d64">HEALTH</span>
+          <span class="token" style="background:#2155cd">SELECT</span>
+          <span class="token" style="background:#e5533d">ALERT</span>
+        </div>
+      </div>
+
+      <div class="screen">
+        <div class="app app-daylight">
+          <div class="winbar">
+            <div class="brand"><img src="icon/icon-2-shield-m-256.png" alt="">MultiVPN</div>
+            <div class="path">daylight-control / home</div>
+            <div class="win-actions"><span></span><span></span><span></span></div>
+          </div>
+          <div class="daylight-shell">
+            <aside class="daylight-side">
+              <div class="nav-brand"><img src="icon/icon-2-shield-m-256.png" alt="">MultiVPN</div>
+              <nav class="daylight-nav">
+                <button class="active"><svg class="icon" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5v8a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg>Home</button>
+                <button><svg class="icon" viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Configurations</button>
+                <button><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="5" rx="1"/><rect x="4" y="14" width="16" height="5" rx="1"/></svg>Servers</button>
+                <button><svg class="icon" viewBox="0 0 24 24"><path d="M4 7h8l3-3 5 5-5 5-3-3H4z"/><path d="M4 17h10"/></svg>Traffic rules</button>
+                <button><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M4 12h2M18 12h2M12 4v2M12 18v2"/></svg>Settings</button>
+              </nav>
+              <div class="side-note">Administrator rights are not required while using the local proxy mode.</div>
+            </aside>
+
+            <section class="daylight-main">
+              <div class="daylight-head">
+                <div>
+                  <h3>Your connection is healthy.</h3>
+                  <p>Traffic was verified through the selected route 18 seconds ago.</p>
+                </div>
+                <div class="profile">SA</div>
+              </div>
+
+              <div class="health-band">
+                <div class="health-symbol">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 3 19 6v5c0 4.7-3 7.8-7 9-4-1.2-7-4.3-7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>
+                </div>
+                <div>
+                  <strong>Frankfurt 04 is connected</strong>
+                  <span>Hysteria2 / 418 ms end-to-end / DNS pinned / TUN active</span>
+                </div>
+                <div class="health-time">00:12:47<small>SESSION</small></div>
+              </div>
+
+              <div class="daylight-grid">
+                <section class="light-card servers-table">
+                  <div class="table-head"><span>Route</span><span>Protocol</span><span>Latency</span></div>
+                  <div class="table-row active">
+                    <div class="server-name"><span class="server-marker">DE</span><div><strong>Frankfurt 04</strong><small>Connected now</small></div></div>
+                    <span class="protocol">Hysteria2</span>
+                    <span class="table-latency">418 ms</span>
+                  </div>
+                  <div class="table-row">
+                    <div class="server-name"><span class="server-marker">TR</span><div><strong>Istanbul 01</strong><small>Saved route</small></div></div>
+                    <span class="protocol">AmneziaWG</span>
+                    <span class="table-latency">380 ms</span>
+                  </div>
+                  <div class="table-row">
+                    <div class="server-name"><span class="server-marker">NL</span><div><strong>Amsterdam 02</strong><small>Saved route</small></div></div>
+                    <span class="protocol">VLESS</span>
+                    <span class="table-latency">521 ms</span>
+                  </div>
+                  <div class="table-row">
+                    <div class="server-name"><span class="server-marker">FI</span><div><strong>Helsinki 03</strong><small>Saved route</small></div></div>
+                    <span class="protocol">OpenVPN</span>
+                    <span class="table-latency">742 ms</span>
+                  </div>
+                  <div class="table-row">
+                    <div class="server-name"><span class="server-marker">US</span><div><strong>New York 01</strong><small>Saved route</small></div></div>
+                    <span class="protocol">WireGuard</span>
+                    <span class="table-latency">880 ms</span>
+                  </div>
+                </section>
+
+                <aside class="light-card control-panel">
+                  <div class="section-rule"><span>Connection details</span><span>Edit</span></div>
+                  <div class="protocol-selector">
+                    <button class="active">TUN</button>
+                    <button>Proxy</button>
+                    <button>System</button>
+                  </div>
+                  <div class="info-line"><span>Route</span><strong>Frankfurt 04</strong></div>
+                  <div class="info-line"><span>Protocol</span><strong>Hysteria2</strong></div>
+                  <div class="info-line"><span>Local proxy</span><strong>127.0.0.1:2080</strong></div>
+                  <div class="info-line"><span>Split tunnel</span><strong>3 apps included</strong></div>
+                  <div class="info-line"><span>Download</span><strong>28.4 Mbps</strong></div>
+                  <button class="daylight-action">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>
+                    Disconnect
+                  </button>
+                  <div class="daylight-subtle">The previous network settings will be restored after disconnect.</div>
+                </aside>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="concept">
+      <div class="concept-copy">
+        <span class="concept-index">03</span>
+        <div>
+          <h2>Route Atlas</h2>
+          <p>A more expressive direction built around a live route map. Devices, the VPN node, and the open internet become a readable path, which gives the interface a memorable structure without sacrificing operational facts.</p>
+        </div>
+        <div class="token-row">
+          <span class="token" style="background:#131a20">NIGHT</span>
+          <span class="token" style="background:#171f25">PLATE</span>
+          <span class="token" style="background:#ff725e;color:#2a100b">ACTIVE</span>
+          <span class="token" style="background:#f4d35e;color:#2a2105">NEXT</span>
+          <span class="token" style="background:#7ddfc2;color:#112016">VERIFIED</span>
+        </div>
+      </div>
+
+      <div class="screen">
+        <div class="app app-route">
+          <div class="winbar">
+            <div class="brand"><img src="icon/icon-2-shield-m-256.png" alt="">MultiVPN</div>
+            <div class="path">route-atlas / frankfurt-04</div>
+            <div class="win-actions"><span></span><span></span><span></span></div>
+          </div>
+          <div class="route-shell">
+            <aside class="route-side">
+              <div class="route-brand"><img src="icon/icon-2-shield-m-256.png" alt="">MultiVPN</div>
+              <h4>ACTIVE ROUTES</h4>
+              <div class="ticket active"><span class="ticket-line"></span><div><strong>Frankfurt 04</strong><small>Hysteria2 / 418 ms</small></div></div>
+              <div class="ticket"><span class="ticket-line"></span><div><strong>Istanbul 01</strong><small>AmneziaWG / 380 ms</small></div></div>
+              <div class="ticket"><span class="ticket-line"></span><div><strong>Amsterdam 02</strong><small>VLESS Reality / 521 ms</small></div></div>
+              <div class="ticket"><span class="ticket-line"></span><div><strong>Helsinki 03</strong><small>OpenVPN / 742 ms</small></div></div>
+              <h4>TOOLS</h4>
+              <div class="ticket"><span class="ticket-line" style="background:#7ddfc2"></span><div><strong>Split tunnel</strong><small>3 apps included</small></div></div>
+              <div class="ticket"><span class="ticket-line" style="background:#7ddfc2"></span><div><strong>Traffic log</strong><small>No errors in this session</small></div></div>
+            </aside>
+
+            <section class="route-main">
+              <div class="route-head">
+                <div>
+                  <h3>Frankfurt 04 is carrying your traffic.</h3>
+                  <p>Hysteria2 route verified through a real HTTPS endpoint 18 seconds ago.</p>
+                </div>
+                <button class="route-button">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>
+                  Disconnect
+                </button>
+              </div>
+
+              <div class="map-card">
+                <div class="map-title"><strong>Live route</strong><span>Local device to verified internet egress</span></div>
+                <div class="route-path">
+                  <svg viewBox="0 0 900 90" preserveAspectRatio="none" aria-hidden="true">
+                    <path class="base" d="M0 52 C130 52 145 10 300 10 S500 82 625 82 S750 16 900 16"/>
+                    <path class="live" d="M0 52 C130 52 145 10 300 10 S500 82 565 75"/>
+                    <path class="next" d="M565 75 C630 68 690 50 760 35 S850 22 900 16"/>
+                  </svg>
+                </div>
+                <div class="node one">
+                  <span class="pin"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span>
+                  <strong>This device</strong><small>Traffic captured</small>
+                </div>
+                <div class="node secondary two">
+                  <span class="pin"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3 19 6v5c0 4.7-3 7.8-7 9-4-1.2-7-4.3-7-9V6z"/></svg></span>
+                  <strong>Frankfurt 04</strong><small>Handshake healthy</small>
+                </div>
+                <div class="node tertiary three">
+                  <span class="pin"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4a13 13 0 0 1 0 16M12 4a13 13 0 0 0 0 16"/></svg></span>
+                  <strong>Open internet</strong><small>Endpoint verified</small>
+                </div>
+                <div class="route-caption">
+                  <span><i style="background:#ff725e"></i>Carrying traffic</span>
+                  <span><i style="background:#f4d35e"></i>Verified exit</span>
+                </div>
+              </div>
+
+              <div class="route-stats">
+                <div class="route-stat accent"><span>DOWNLOAD</span><strong>28.4</strong><small>Mbps now</small></div>
+                <div class="route-stat yellow"><span>UPLOAD</span><strong>7.8</strong><small>Mbps now</small></div>
+                <div class="route-stat green"><span>LATENCY</span><strong>418</strong><small>milliseconds</small></div>
+                <div class="route-stat"><span>SESSION</span><strong>12:47</strong><small>minutes elapsed</small></div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function fitScreens() {
+      document.querySelectorAll('.screen').forEach((screen) => {
+        const scale = Math.min(1, screen.clientWidth / 1280);
+        screen.style.setProperty('--screen-scale', scale.toFixed(4));
+        screen.style.height = `${Math.round(760 * scale)}px`;
+      });
+    }
+
+    const observer = new ResizeObserver(fitScreens);
+    document.querySelectorAll('.screen').forEach((screen) => observer.observe(screen));
+    window.addEventListener('resize', fitScreens);
+    fitScreens();
+  </script>
+</body>
+</html>
